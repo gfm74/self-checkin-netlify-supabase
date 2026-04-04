@@ -117,7 +117,12 @@ async function updateCheckinRow({ supabaseUrl, serviceRoleKey, table, submission
 }
 
 async function createSignedFileUrl({ supabaseUrl, serviceRoleKey, bucket, path, expiresIn }) {
-  const response = await fetch(`${supabaseUrl}/storage/v1/object/sign/${bucket}`, {
+  const encodedPath = String(path)
+    .split("/")
+    .map((part) => encodeURIComponent(part))
+    .join("/");
+
+  const response = await fetch(`${supabaseUrl}/storage/v1/object/sign/${bucket}/${encodedPath}`, {
     method: "POST",
     headers: {
       apikey: serviceRoleKey,
@@ -125,7 +130,6 @@ async function createSignedFileUrl({ supabaseUrl, serviceRoleKey, bucket, path, 
       "Content-Type": "application/json"
     },
     body: JSON.stringify({
-      path,
       expiresIn
     })
   });
