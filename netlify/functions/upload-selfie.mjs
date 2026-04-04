@@ -170,6 +170,28 @@ async function sendResendEmail({ apiKey, from, to, subject, html }) {
   return response.json();
 }
 
+async function sendTelegramMessage({ botToken, chatId, text }) {
+  const response = await fetch(`https://api.telegram.org/bot${botToken}/sendMessage`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      chat_id: chatId,
+      text,
+      parse_mode: "HTML",
+      disable_web_page_preview: false
+    })
+  });
+
+  if (!response.ok) {
+    const textBody = await response.text();
+    throw new Error(`telegram-failed:${response.status}:${textBody}`);
+  }
+
+  return response.json();
+}
+
 function buildEmailHtml({ language, filePath, signedUrl, submissionId, createdAt }) {
   const lang = String(language || "en").toLowerCase();
   const labels = {
@@ -208,6 +230,43 @@ function buildEmailHtml({ language, filePath, signedUrl, submissionId, createdAt
   `;
 }
 
+function escapeHtml(value) {
+  return String(value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function buildTelegramMessage({ language, filePath, signedUrl, submissionId, createdAt }) {
+  const lang = String(language || "en").toLowerCase();
+  const labels = {
+    it: {
+      title: "Nuovo selfie check-in",
+      photo: "Apri foto",
+      submissionId: "Submission ID",
+      filePath: "File",
+      createdAt: "Creato"
+    },
+    en: {
+      title: "New check-in selfie",
+      photo: "Open photo",
+      submissionId: "Submission ID",
+      filePath: "File",
+      createdAt: "Created"
+    }
+  };
+
+  const t = labels[lang] || labels.en;
+  return [
+    `<b>${escapeHtml(t.title)}</b>`,
+    `<a href="${escapeHtml(signedUrl)}">${escapeHtml(t.photo)}</a>`,
+    `${escapeHtml(t.submissionId)}: <code>${escapeHtml(submissionId)}</code>`,
+    `${escapeHtml(t.filePath)}: <code>${escapeHtml(filePath)}</code>`,
+    `${escapeHtml(t.createdAt)}: <code>${escapeHtml(createdAt)}</code>`
+  ].join("\n");
+}
+
 export default async (request) => {
   if (request.method === "OPTIONS") {
     return new Response(null, {
@@ -233,6 +292,8 @@ export default async (request) => {
     const resendApiKey = process.env.RESEND_API_KEY || "";
     const notifyTo = process.env.SELFIE_NOTIFY_TO || "";
     const resendFrom = process.env.RESEND_FROM_EMAIL || "";
+    const telegramBotToken = process.env.TELEGRAM_BOT_TOKEN || "";
+    const telegramChatId = process.env.TELEGRAM_CHAT_ID || "";
     const signedUrlSeconds = Number(process.env.SELFIE_LINK_EXPIRES_IN || DEFAULT_SIGNED_URL_SECONDS);
 
     const body = await request.json();
@@ -329,9 +390,13 @@ export default async (request) => {
       throw error;
     });
 
-    let notification = { enabled: false, sent: false };
+    let notification = { enabled: false, sent: false, channel: null };
+    const shouldNotify = (
+      (resendApiKey && notifyTo && resendFrom) ||
+      (telegramBotToken && telegramChatId)
+    );
 
-    if (resendApiKey && notifyTo && resendFrom) {
+    if (shouldNotify) {
       const signedUrl = await createSignedFileUrl({
         supabaseUrl,
         serviceRoleKey,
@@ -340,21 +405,39 @@ export default async (request) => {
         expiresIn: signedUrlSeconds
       });
 
-      await sendResendEmail({
-        apiKey: resendApiKey,
-        from: resendFrom,
-        to: notifyTo,
-        subject: `Nuovo selfie check-in (${language.toUpperCase()})`,
-        html: buildEmailHtml({
-          language,
-          filePath,
-          signedUrl,
-          submissionId,
-          createdAt: new Date().toISOString()
-        })
-      });
+      const createdAt = new Date().toISOString();
 
-      notification = { enabled: true, sent: true };
+      if (telegramBotToken && telegramChatId) {
+        await sendTelegramMessage({
+          botToken: telegramBotToken,
+          chatId: telegramChatId,
+          text: buildTelegramMessage({
+            language,
+            filePath,
+            signedUrl,
+            submissionId,
+            createdAt
+          })
+        });
+
+        notification = { enabled: true, sent: true, channel: "telegram" };
+      } else if (resendApiKey && notifyTo && resendFrom) {
+        await sendResendEmail({
+          apiKey: resendApiKey,
+          from: resendFrom,
+          to: notifyTo,
+          subject: `Nuovo selfie check-in (${language.toUpperCase()})`,
+          html: buildEmailHtml({
+            language,
+            filePath,
+            signedUrl,
+            submissionId,
+            createdAt
+          })
+        });
+
+        notification = { enabled: true, sent: true, channel: "email" };
+      }
     }
 
     return json(200, {

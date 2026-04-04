@@ -98,3 +98,23 @@ Esempio valori:
 - `SELFIE_LINK_EXPIRES_IN` = `604800` per un link valido 7 giorni
 
 Se queste variabili non sono presenti, l'app continua a funzionare senza inviare email.
+
+## Notifica Telegram opzionale
+
+Se vuoi una notifica piu' veloce da configurare, puoi usare Telegram invece dell'email.
+
+La function supporta anche:
+
+- `TELEGRAM_BOT_TOKEN`
+- `TELEGRAM_CHAT_ID`
+- `SELFIE_LINK_EXPIRES_IN`
+
+Flusso consigliato:
+
+1. crea un bot con BotFather
+2. recupera il token del bot
+3. invia un messaggio al bot dal tuo account Telegram
+4. recupera il tuo `chat_id`
+5. aggiungi le variabili su Netlify
+
+Quando arriva un nuovo selfie, ricevi un messaggio Telegram con link temporaneo alla foto.
