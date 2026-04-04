@@ -390,7 +390,7 @@ export default async (request) => {
       throw error;
     });
 
-    let notification = { enabled: false, sent: false, channel: null };
+    let notification = { enabled: false, sent: false, channel: null, error: null };
     const shouldNotify = (
       (resendApiKey && notifyTo && resendFrom) ||
       (telegramBotToken && telegramChatId)
@@ -408,35 +408,55 @@ export default async (request) => {
       const createdAt = new Date().toISOString();
 
       if (telegramBotToken && telegramChatId) {
-        await sendTelegramMessage({
-          botToken: telegramBotToken,
-          chatId: telegramChatId,
-          text: buildTelegramMessage({
-            language,
-            filePath,
-            signedUrl,
-            submissionId,
-            createdAt
-          })
-        });
+        try {
+          await sendTelegramMessage({
+            botToken: telegramBotToken,
+            chatId: telegramChatId,
+            text: buildTelegramMessage({
+              language,
+              filePath,
+              signedUrl,
+              submissionId,
+              createdAt
+            })
+          });
 
-        notification = { enabled: true, sent: true, channel: "telegram" };
+          notification = { enabled: true, sent: true, channel: "telegram", error: null };
+        } catch (error) {
+          console.error("telegram notification error", error);
+          notification = {
+            enabled: true,
+            sent: false,
+            channel: "telegram",
+            error: "telegram_failed"
+          };
+        }
       } else if (resendApiKey && notifyTo && resendFrom) {
-        await sendResendEmail({
-          apiKey: resendApiKey,
-          from: resendFrom,
-          to: notifyTo,
-          subject: `Nuovo selfie check-in (${language.toUpperCase()})`,
-          html: buildEmailHtml({
-            language,
-            filePath,
-            signedUrl,
-            submissionId,
-            createdAt
-          })
-        });
+        try {
+          await sendResendEmail({
+            apiKey: resendApiKey,
+            from: resendFrom,
+            to: notifyTo,
+            subject: `Nuovo selfie check-in (${language.toUpperCase()})`,
+            html: buildEmailHtml({
+              language,
+              filePath,
+              signedUrl,
+              submissionId,
+              createdAt
+            })
+          });
 
-        notification = { enabled: true, sent: true, channel: "email" };
+          notification = { enabled: true, sent: true, channel: "email", error: null };
+        } catch (error) {
+          console.error("email notification error", error);
+          notification = {
+            enabled: true,
+            sent: false,
+            channel: "email",
+            error: "email_failed"
+          };
+        }
       }
     }
 
