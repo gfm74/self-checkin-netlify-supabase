@@ -397,18 +397,18 @@ export default async (request) => {
     );
 
     if (shouldNotify) {
-      const signedUrl = await createSignedFileUrl({
-        supabaseUrl,
-        serviceRoleKey,
-        bucket,
-        path: filePath,
-        expiresIn: signedUrlSeconds
-      });
+      try {
+        const signedUrl = await createSignedFileUrl({
+          supabaseUrl,
+          serviceRoleKey,
+          bucket,
+          path: filePath,
+          expiresIn: signedUrlSeconds
+        });
 
-      const createdAt = new Date().toISOString();
+        const createdAt = new Date().toISOString();
 
-      if (telegramBotToken && telegramChatId) {
-        try {
+        if (telegramBotToken && telegramChatId) {
           await sendTelegramMessage({
             botToken: telegramBotToken,
             chatId: telegramChatId,
@@ -422,17 +422,7 @@ export default async (request) => {
           });
 
           notification = { enabled: true, sent: true, channel: "telegram", error: null };
-        } catch (error) {
-          console.error("telegram notification error", error);
-          notification = {
-            enabled: true,
-            sent: false,
-            channel: "telegram",
-            error: "telegram_failed"
-          };
-        }
-      } else if (resendApiKey && notifyTo && resendFrom) {
-        try {
+        } else if (resendApiKey && notifyTo && resendFrom) {
           await sendResendEmail({
             apiKey: resendApiKey,
             from: resendFrom,
@@ -448,15 +438,15 @@ export default async (request) => {
           });
 
           notification = { enabled: true, sent: true, channel: "email", error: null };
-        } catch (error) {
-          console.error("email notification error", error);
-          notification = {
-            enabled: true,
-            sent: false,
-            channel: "email",
-            error: "email_failed"
-          };
         }
+      } catch (error) {
+        console.error("notification setup or delivery error", error);
+        notification = {
+          enabled: true,
+          sent: false,
+          channel: telegramBotToken && telegramChatId ? "telegram" : "email",
+          error: "notification_failed"
+        };
       }
     }
 
