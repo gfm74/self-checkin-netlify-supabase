@@ -1,0 +1,582 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <title>Check-In Selfie</title>
+  <style>
+    :root {
+      --p: #208091;
+      --p2: #1a6976;
+      --bg: #f5f5f5;
+      --card: #fff;
+      --txt: #1f2121;
+      --mut: #667;
+      --danger: #c0392b;
+      --ok: #1f7a4d;
+      --r: 14px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg);
+      color: var(--txt);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+      flex-direction: column;
+    }
+
+    .container { width: 100%; max-width: 440px; position: relative; }
+
+    .lang-switch {
+      display: flex;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 16px;
+      z-index: 10;
+      flex-wrap: wrap;
+    }
+
+    .lang-btn {
+      padding: 8px 12px;
+      border: 1px solid var(--p);
+      border-radius: 20px;
+      background: transparent;
+      color: var(--p);
+      font-weight: 700;
+      font-size: 12px;
+      cursor: pointer;
+      transition: .2s;
+      min-width: 40px;
+    }
+
+    .lang-btn.active { background: var(--p); color: #fff; }
+    .lang-btn:hover { opacity: .8; }
+
+    .card {
+      width: 100%;
+      background: var(--card);
+      border-radius: var(--r);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, .08);
+      padding: 32px 20px;
+    }
+
+    h1 {
+      font-size: 24px;
+      margin-bottom: 16px;
+      font-weight: 700;
+      color: var(--p2);
+      text-align: center;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .subtitle {
+      text-align: center;
+      margin-bottom: 24px;
+      font-size: 15px;
+      line-height: 1.5;
+      color: var(--txt);
+    }
+
+    .instructions {
+      background: #f8f9fa;
+      border: 1px solid #e0e0e0;
+      border-radius: 10px;
+      padding: 16px;
+      margin-bottom: 24px;
+    }
+
+    .step {
+      display: flex;
+      align-items: flex-start;
+      margin-bottom: 12px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    .step:last-child { margin-bottom: 0; }
+
+    .bullet {
+      color: var(--p);
+      margin-right: 10px;
+      font-weight: bold;
+      min-width: 16px;
+    }
+
+    .btn {
+      width: 100%;
+      border: 0;
+      border-radius: 16px;
+      padding: 18px;
+      font-size: 18px;
+      font-weight: 800;
+      cursor: pointer;
+      background: var(--p);
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      box-shadow: 0 4px 12px rgba(32, 128, 145, 0.2);
+    }
+
+    .btn:active { transform: scale(.98); }
+    .btn:disabled { opacity: .6; cursor: not-allowed; }
+
+    .status {
+      display: none;
+      margin-top: 14px;
+      padding: 12px;
+      border-radius: 12px;
+      font-weight: 600;
+      text-align: center;
+      background: rgba(32, 128, 145, .1);
+      color: var(--p2);
+    }
+
+    .status.error {
+      background: rgba(192, 57, 43, .1);
+      color: var(--danger);
+    }
+
+    .status.success {
+      background: rgba(31, 122, 77, .1);
+      color: var(--ok);
+    }
+
+    .legal {
+      margin-top: 24px;
+      font-size: 11px;
+      color: var(--mut);
+      text-align: center;
+      line-height: 1.5;
+      border-top: 1px solid #e0e0e0;
+      padding-top: 16px;
+    }
+
+    .micro {
+      margin-top: 12px;
+      font-size: 10px;
+      color: #999;
+      text-align: center;
+      line-height: 1.4;
+    }
+
+    input[type=file] { display: none; }
+    .lang-content { display: none; }
+    .lang-content.active { display: block; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="lang-switch">
+      <button class="lang-btn active" data-lang="it" type="button">IT</button>
+      <button class="lang-btn" data-lang="en" type="button">EN</button>
+      <button class="lang-btn" data-lang="de" type="button">DE</button>
+      <button class="lang-btn" data-lang="fr" type="button">FR</button>
+      <button class="lang-btn" data-lang="es" type="button">ES</button>
+    </div>
+
+    <div class="card">
+      <div class="lang-content active" data-lang="it">
+        <h1>Check-In Selfie</h1>
+        <p class="subtitle">Tocca il pulsante per scattare e inviare il tuo selfie.</p>
+        <div class="instructions">
+          <div class="step"><span class="bullet">•</span><div>Assicurati di essere all'interno dell'appartamento</div></div>
+          <div class="step"><span class="bullet">•</span><div>Consenti l'accesso alla fotocamera</div></div>
+          <div class="step"><span class="bullet">•</span><div>Tocca START e guarda la fotocamera</div></div>
+        </div>
+        <input class="fileInput" type="file" accept="image/*" capture="user" />
+        <button class="btn oneBtn" type="button">START</button>
+        <div class="status">Apertura fotocamera...</div>
+        <div class="legal">Il selfie è richiesto per l'identificazione "de visu" ai sensi della normativa italiana (art. 109 TULPS).</div>
+        <div class="micro">Il selfie viene utilizzato esclusivamente per completare la procedura di check-in.</div>
+      </div>
+
+      <div class="lang-content" data-lang="en">
+        <h1>Check-In Selfie</h1>
+        <p class="subtitle">Tap the button to take and send your selfie.</p>
+        <div class="instructions">
+          <div class="step"><span class="bullet">•</span><div>Make sure you are inside the apartment</div></div>
+          <div class="step"><span class="bullet">•</span><div>Allow camera access</div></div>
+          <div class="step"><span class="bullet">•</span><div>Tap START and look at the camera</div></div>
+        </div>
+        <input class="fileInput" type="file" accept="image/*" capture="user" />
+        <button class="btn oneBtn" type="button">START</button>
+        <div class="status">Opening camera...</div>
+        <div class="legal">The selfie is required for "de visu" identification in accordance with Italian law (art. 109 TULPS).</div>
+        <div class="micro">The selfie is used only to complete the check-in procedure.</div>
+      </div>
+
+      <div class="lang-content" data-lang="de">
+        <h1>Check-In Selfie</h1>
+        <p class="subtitle">Tippen Sie auf die Schaltfläche, um ein Selfie aufzunehmen und zu versenden.</p>
+        <div class="instructions">
+          <div class="step"><span class="bullet">•</span><div>Stellen Sie sicher, dass Sie sich in der Wohnung befinden</div></div>
+          <div class="step"><span class="bullet">•</span><div>Erlauben Sie den Kamerazugriff</div></div>
+          <div class="step"><span class="bullet">•</span><div>Tippen Sie auf START und schauen Sie in die Kamera</div></div>
+        </div>
+        <input class="fileInput" type="file" accept="image/*" capture="user" />
+        <button class="btn oneBtn" type="button">START</button>
+        <div class="status">Kamera wird geöffnet...</div>
+        <div class="legal">Das Selfie ist nach italienischem Recht (Art. 109 TULPS) für die persönliche Identifizierung erforderlich.</div>
+        <div class="micro">Das Selfie wird ausschließlich zum Abschluss des Check-in-Verfahrens verwendet.</div>
+      </div>
+
+      <div class="lang-content" data-lang="fr">
+        <h1>Check-In Selfie</h1>
+        <p class="subtitle">Appuyez sur le bouton pour prendre et envoyer votre selfie.</p>
+        <div class="instructions">
+          <div class="step"><span class="bullet">•</span><div>Assurez-vous que vous êtes à l'intérieur de l'appartement</div></div>
+          <div class="step"><span class="bullet">•</span><div>Autorisez l'accès à la caméra</div></div>
+          <div class="step"><span class="bullet">•</span><div>Appuyez sur START et regardez la caméra</div></div>
+        </div>
+        <input class="fileInput" type="file" accept="image/*" capture="user" />
+        <button class="btn oneBtn" type="button">START</button>
+        <div class="status">Ouverture de la caméra...</div>
+        <div class="legal">Le selfie est obligatoire pour l'identification "de visu" en vertu de la loi italienne (art. 109 TULPS).</div>
+        <div class="micro">Le selfie est utilisé uniquement pour compléter la procédure d'enregistrement.</div>
+      </div>
+
+      <div class="lang-content" data-lang="es">
+        <h1>Check-In Selfie</h1>
+        <p class="subtitle">Toque el botón para tomar y enviar su selfie.</p>
+        <div class="instructions">
+          <div class="step"><span class="bullet">•</span><div>Asegúrese de estar dentro del apartamento</div></div>
+          <div class="step"><span class="bullet">•</span><div>Permita el acceso a la cámara</div></div>
+          <div class="step"><span class="bullet">•</span><div>Toque START y mire a la cámara</div></div>
+        </div>
+        <input class="fileInput" type="file" accept="image/*" capture="user" />
+        <button class="btn oneBtn" type="button">START</button>
+        <div class="status">Abriendo cámara...</div>
+        <div class="legal">La selfie es obligatoria para la identificación "de visu" de conformidad con la ley italiana (art. 109 TULPS).</div>
+        <div class="micro">La selfie se utiliza únicamente para completar el procedimiento de check-in.</div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const MAX_FILE_BYTES = 12 * 1024 * 1024;
+    const MAX_IMAGE_WIDTH = 1600;
+    const JPEG_QUALITY = 0.82;
+    const REQUEST_TIMEOUT_MS = 45000;
+
+    const i18n = {
+      it: {
+        opening: "Apertura fotocamera...",
+        preparing: "Preparazione selfie...",
+        uploading: "Invio in corso...",
+        success: "Selfie inviato. Reindirizzamento...",
+        invalidType: "Usa una foto in formato immagine.",
+        tooLarge: "La foto è troppo pesante. Riprova con uno scatto più leggero.",
+        duplicate: "Questo selfie risulta già inviato.",
+        genericError: "Si è verificato un problema durante l'invio. Riprova tra qualche secondo.",
+        networkError: "Connessione assente o server non raggiungibile. Riprova.",
+        cancel: "Operazione annullata.",
+      },
+      en: {
+        opening: "Opening camera...",
+        preparing: "Preparing selfie...",
+        uploading: "Uploading...",
+        success: "Selfie sent. Redirecting...",
+        invalidType: "Please use an image file.",
+        tooLarge: "The picture is too large. Please try again with a lighter image.",
+        duplicate: "This selfie was already sent.",
+        genericError: "Something went wrong during upload. Please try again in a few seconds.",
+        networkError: "No connection or server unavailable. Please try again.",
+        cancel: "Operation cancelled.",
+      },
+      de: {
+        opening: "Kamera wird geöffnet...",
+        preparing: "Selfie wird vorbereitet...",
+        uploading: "Upload läuft...",
+        success: "Selfie gesendet. Weiterleitung...",
+        invalidType: "Bitte verwenden Sie eine Bilddatei.",
+        tooLarge: "Das Bild ist zu groß. Bitte versuchen Sie es mit einem kleineren Foto erneut.",
+        duplicate: "Dieses Selfie wurde bereits gesendet.",
+        genericError: "Beim Upload ist ein Problem aufgetreten. Bitte in einigen Sekunden erneut versuchen.",
+        networkError: "Keine Verbindung oder Server nicht erreichbar. Bitte erneut versuchen.",
+        cancel: "Vorgang abgebrochen.",
+      },
+      fr: {
+        opening: "Ouverture de la caméra...",
+        preparing: "Préparation du selfie...",
+        uploading: "Envoi en cours...",
+        success: "Selfie envoyé. Redirection...",
+        invalidType: "Veuillez utiliser un fichier image.",
+        tooLarge: "La photo est trop lourde. Réessayez avec une image plus légère.",
+        duplicate: "Ce selfie a déjà été envoyé.",
+        genericError: "Un problème est survenu pendant l'envoi. Réessayez dans quelques secondes.",
+        networkError: "Connexion absente ou serveur indisponible. Veuillez réessayer.",
+        cancel: "Opération annulée.",
+      },
+      es: {
+        opening: "Abriendo cámara...",
+        preparing: "Preparando selfie...",
+        uploading: "Envío en curso...",
+        success: "Selfie enviado. Redirigiendo...",
+        invalidType: "Usa un archivo de imagen.",
+        tooLarge: "La foto es demasiado pesada. Inténtalo de nuevo con una imagen más ligera.",
+        duplicate: "Este selfie ya fue enviado.",
+        genericError: "Se produjo un problema durante el envío. Inténtalo de nuevo en unos segundos.",
+        networkError: "Sin conexión o servidor no disponible. Inténtalo de nuevo.",
+        cancel: "Operación cancelada.",
+      }
+    };
+
+    const langBtns = document.querySelectorAll('.lang-btn');
+    const langContents = document.querySelectorAll('.lang-content');
+
+    function getDeviceLanguage() {
+      try {
+        const browserLang = navigator.language || navigator.userLanguage;
+        const langMap = { it: 'it', en: 'en', de: 'de', fr: 'fr', es: 'es' };
+        const shortLang = browserLang.split('-')[0].toLowerCase();
+        return langMap[shortLang] || 'en';
+      } catch (error) {
+        return 'en';
+      }
+    }
+
+    function setLanguage(lang) {
+      langContents.forEach((el) => el.classList.remove('active'));
+      langBtns.forEach((el) => el.classList.remove('active'));
+
+      const content = document.querySelector(`.lang-content[data-lang="${lang}"]`);
+      const btn = document.querySelector(`.lang-btn[data-lang="${lang}"]`);
+
+      if (content && btn) {
+        content.classList.add('active');
+        btn.classList.add('active');
+        document.documentElement.lang = lang;
+        localStorage.setItem('selectedLang', lang);
+      }
+    }
+
+    function translate(lang, key) {
+      return (i18n[lang] && i18n[lang][key]) || i18n.en[key] || '';
+    }
+
+    function setStatus(statusEl, message, type) {
+      statusEl.style.display = 'block';
+      statusEl.classList.remove('error', 'success');
+      if (type) {
+        statusEl.classList.add(type);
+      }
+      statusEl.textContent = message;
+    }
+
+    function resetButton(button) {
+      button.disabled = false;
+      button.style.opacity = '1';
+    }
+
+    function lockButton(button) {
+      button.disabled = true;
+      button.style.opacity = '0.5';
+    }
+
+    function buildSubmissionId() {
+      if (window.crypto && window.crypto.randomUUID) {
+        return window.crypto.randomUUID();
+      }
+      return `selfie-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    }
+
+    function fileToImage(file) {
+      return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const img = new Image();
+          img.onload = () => resolve(img);
+          img.onerror = () => reject(new Error('invalid-image'));
+          img.src = reader.result;
+        };
+        reader.onerror = () => reject(new Error('read-failed'));
+        reader.readAsDataURL(file);
+      });
+    }
+
+    function canvasToBlob(canvas, type, quality) {
+      return new Promise((resolve) => {
+        canvas.toBlob(resolve, type, quality);
+      });
+    }
+
+    async function normalizeImage(file) {
+      const img = await fileToImage(file);
+      const ratio = Math.min(1, MAX_IMAGE_WIDTH / img.width);
+      const width = Math.max(1, Math.round(img.width * ratio));
+      const height = Math.max(1, Math.round(img.height * ratio));
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+
+      const ctx = canvas.getContext('2d', { alpha: false });
+      ctx.drawImage(img, 0, 0, width, height);
+
+      const blob = await canvasToBlob(canvas, 'image/jpeg', JPEG_QUALITY);
+      if (!blob) {
+        throw new Error('compress-failed');
+      }
+
+      const base64 = await new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          const result = String(reader.result || '');
+          const commaIndex = result.indexOf(',');
+          if (commaIndex === -1) {
+            reject(new Error('base64-failed'));
+            return;
+          }
+          resolve(result.slice(commaIndex + 1));
+        };
+        reader.onerror = () => reject(new Error('base64-failed'));
+        reader.readAsDataURL(blob);
+      });
+
+      return {
+        base64,
+        mimeType: 'image/jpeg',
+        size: blob.size,
+        fileName: `selfie-${Date.now()}.jpg`
+      };
+    }
+
+    async function sendSelfie(payload) {
+      const controller = new AbortController();
+      const timeoutId = window.setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+
+      try {
+        const response = await fetch('/.netlify/functions/upload-selfie', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(payload),
+          signal: controller.signal
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          const err = new Error(data.error || 'upload-failed');
+          err.code = data.code || 'upload_failed';
+          throw err;
+        }
+
+        return data;
+      } finally {
+        window.clearTimeout(timeoutId);
+      }
+    }
+
+    function bindUploader(section) {
+      const btn = section.querySelector('.oneBtn');
+      const input = section.querySelector('.fileInput');
+      const status = section.querySelector('.status');
+      const lang = section.dataset.lang;
+      let isBusy = false;
+
+      if (!btn || !input || !status) {
+        return;
+      }
+
+      btn.addEventListener('click', () => {
+        if (isBusy) {
+          return;
+        }
+
+        setStatus(status, translate(lang, 'opening'));
+        input.value = '';
+        input.click();
+      });
+
+      input.addEventListener('change', async () => {
+        const file = input.files && input.files[0];
+
+        if (!file) {
+          setStatus(status, translate(lang, 'cancel'));
+          window.setTimeout(() => {
+            status.style.display = 'none';
+          }, 1500);
+          return;
+        }
+
+        if (isBusy) {
+          return;
+        }
+
+        if (!file.type.startsWith('image/')) {
+          setStatus(status, translate(lang, 'invalidType'), 'error');
+          return;
+        }
+
+        if (file.size > MAX_FILE_BYTES) {
+          setStatus(status, translate(lang, 'tooLarge'), 'error');
+          return;
+        }
+
+        const submissionId = buildSubmissionId();
+        const submissionKey = `selfie-upload:${submissionId}`;
+        isBusy = true;
+        lockButton(btn);
+
+        try {
+          sessionStorage.setItem(submissionKey, 'pending');
+          setStatus(status, translate(lang, 'preparing'));
+
+          const prepared = await normalizeImage(file);
+          setStatus(status, translate(lang, 'uploading'));
+
+          const result = await sendSelfie({
+            submissionId,
+            language: lang,
+            clientTimestamp: new Date().toISOString(),
+            originalName: file.name || prepared.fileName,
+            mimeType: prepared.mimeType,
+            imageBase64: prepared.base64
+          });
+
+          sessionStorage.setItem(submissionKey, result.status || 'stored');
+          setStatus(status, translate(lang, 'success'), 'success');
+          window.location.href = '/success.html';
+        } catch (error) {
+          sessionStorage.removeItem(submissionKey);
+
+          if (error.name === 'AbortError') {
+            setStatus(status, translate(lang, 'networkError'), 'error');
+          } else if (error.code === 'duplicate_submission') {
+            setStatus(status, translate(lang, 'duplicate'), 'error');
+          } else if (error.code === 'payload_too_large') {
+            setStatus(status, translate(lang, 'tooLarge'), 'error');
+          } else if (error.code === 'network_error') {
+            setStatus(status, translate(lang, 'networkError'), 'error');
+          } else {
+            setStatus(status, translate(lang, 'genericError'), 'error');
+          }
+
+          resetButton(btn);
+          isBusy = false;
+        }
+      });
+    }
+
+    langBtns.forEach((btn) => {
+      btn.addEventListener('click', () => {
+        setLanguage(btn.dataset.lang);
+      });
+    });
+
+    const savedLang = localStorage.getItem('selectedLang') || getDeviceLanguage();
+    setLanguage(savedLang);
+    document.querySelectorAll('.lang-content').forEach(bindUploader);
+  </script>
+</body>
+</html>

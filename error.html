@@ -1,0 +1,68 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Error</title>
+<style>
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  display:flex;align-items:center;justify-content:center;
+  min-height:100vh;background:#f5f5f5;margin:0;text-align:center;padding:20px
+}
+.card{
+  background:#fff;padding:30px;border-radius:14px;
+  box-shadow:0 2px 10px rgba(0,0,0,.08);
+  max-width:420px
+}
+h1{color:#c0392b;margin-bottom:10px}
+p{color:#333;line-height:1.5}
+</style>
+</head>
+<body>
+<div class="card">
+  <h1 id="title"></h1>
+  <p id="text1"></p>
+  <p id="text2"></p>
+</div>
+<script>
+const savedLang = localStorage.getItem('selectedLang');
+const browserLang = (navigator.language || 'en').split('-')[0];
+const lang = savedLang || browserLang;
+
+const t = {
+  it: {
+    title: "⚠️ Errore invio",
+    t1: "Si è verificato un problema durante l'invio del selfie.",
+    t2: "Riprova tra qualche secondo o contatta l’host."
+  },
+  en: {
+    title: "⚠️ Upload error",
+    t1: "There was a problem sending your selfie.",
+    t2: "Please try again or contact the host."
+  },
+  fr: {
+    title: "⚠️ Erreur d’envoi",
+    t1: "Un problème s'est produit lors de l'envoi du selfie.",
+    t2: "Veuillez réessayer ou contacter l’hôte."
+  },
+  de: {
+    title: "⚠️ Upload-Fehler",
+    t1: "Beim Senden des Selfies ist ein Problem aufgetreten.",
+    t2: "Bitte erneut versuchen oder den Gastgeber kontaktieren."
+  },
+  es: {
+    title: "⚠️ Error de envío",
+    t1: "Hubo un problema al enviar el selfie.",
+    t2: "Inténtalo de nuevo o contacta con el anfitrión."
+  }
+};
+
+const L = t[lang] || t.en;
+document.documentElement.lang = (t[lang] ? lang : 'en');
+document.getElementById("title").textContent = L.title;
+document.getElementById("text1").textContent = L.t1;
+document.getElementById("text2").textContent = L.t2;
+</script>
+</body>
+</html>
