@@ -70,4 +70,31 @@ Puoi usare `.env.example` come promemoria.
 - La function usa la `service role key`, quindi la chiave deve restare solo su Netlify e mai nel frontend.
 - Questa base evita i doppi invii tramite `submission_id` univoco.
 - Le foto vengono compresse lato browser per ridurre errori da mobile e occupazione spazio.
-- Se vuoi, come passo successivo possiamo aggiungere una mail di notifica con link alla foto invece dell'allegato.
+
+## Notifica email opzionale
+
+La function supporta una notifica email con link temporaneo alla foto usando Resend.
+
+Al 5 aprile 2026, il piano gratuito di Resend include `3.000 email/mese` e `100 email/giorno`.
+
+Fonti:
+
+- [Resend pricing](https://resend.com/pricing)
+- [Resend send email API](https://resend.com/docs/api-reference/emails/send-email)
+- [Supabase signed URLs](https://supabase.com/docs/reference/javascript/storage-from-createsignedurl)
+
+Per attivarla, aggiungi su Netlify queste variabili:
+
+- `RESEND_API_KEY`
+- `RESEND_FROM_EMAIL`
+- `SELFIE_NOTIFY_TO`
+- `SELFIE_LINK_EXPIRES_IN`
+
+Esempio valori:
+
+- `RESEND_API_KEY` = chiave API Resend
+- `RESEND_FROM_EMAIL` = `Self Check-In <onboarding@resend.dev>` per i primi test
+- `SELFIE_NOTIFY_TO` = la tua email
+- `SELFIE_LINK_EXPIRES_IN` = `604800` per un link valido 7 giorni
+
+Se queste variabili non sono presenti, l'app continua a funzionare senza inviare email.
