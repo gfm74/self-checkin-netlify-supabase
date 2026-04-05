@@ -144,9 +144,16 @@
     .card-top {
       display: flex;
       justify-content: space-between;
-      align-items: start;
-      gap: 10px;
-      margin-bottom: 10px;
+      align-items: stretch;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+
+    .card-id {
+      display: flex;
+      align-items: flex-start;
+      gap: 8px;
+      flex-wrap: wrap;
     }
 
     .badge {
@@ -158,6 +165,41 @@
       color: var(--accent-dark);
       font-size: 12px;
       font-weight: 800;
+    }
+
+    .date-box {
+      min-width: 124px;
+      padding: 10px 12px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, var(--accent-dark), var(--accent));
+      color: #fff;
+      text-align: right;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.18);
+    }
+
+    .date-label {
+      display: block;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.1px;
+      opacity: 0.8;
+      text-transform: uppercase;
+      margin-bottom: 4px;
+    }
+
+    .date-value {
+      display: block;
+      font-size: 18px;
+      line-height: 1.1;
+      font-weight: 800;
+    }
+
+    .time-value {
+      display: block;
+      margin-top: 6px;
+      font-size: 12px;
+      font-weight: 700;
+      opacity: 0.92;
     }
 
     .path {
@@ -181,11 +223,57 @@
       color: var(--muted);
     }
 
+    .meta-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 8px 12px;
+      margin-bottom: 12px;
+    }
+
+    .meta-item {
+      background: #f5f7f8;
+      border-radius: 12px;
+      padding: 10px 12px;
+    }
+
+    .meta-item strong {
+      display: block;
+      font-size: 11px;
+      color: var(--muted);
+      margin-bottom: 2px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .meta-item span {
+      font-size: 13px;
+      color: var(--ink);
+      font-weight: 700;
+      word-break: break-word;
+    }
+
+    .record-id {
+      margin: 0 0 12px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      background: #f8fafb;
+      font-size: 12px;
+      color: var(--muted);
+      word-break: break-all;
+    }
+
+    .record-id strong {
+      color: var(--accent-dark);
+    }
+
     @media (max-width: 640px) {
       body { padding: 14px; }
       h1 { font-size: 26px; }
       .hero, .panel, .card { border-radius: 16px; }
       .actions > * { width: 100%; }
+      .card-top { align-items: flex-start; flex-direction: column; }
+      .date-box { width: 100%; text-align: left; }
+      .meta-grid { grid-template-columns: 1fr; }
     }
   </style>
 </head>
@@ -241,6 +329,28 @@
       }
     }
 
+    function formatDateParts(value) {
+      try {
+        const date = new Date(value);
+        return {
+          day: date.toLocaleDateString('it-IT', {
+            day: '2-digit',
+            month: '2-digit',
+            year: '2-digit'
+          }),
+          time: date.toLocaleTimeString('it-IT', {
+            hour: '2-digit',
+            minute: '2-digit'
+          })
+        };
+      } catch (error) {
+        return {
+          day: value || '-',
+          time: ''
+        };
+      }
+    }
+
     function formatBytes(bytes) {
       if (!Number.isFinite(bytes) || bytes <= 0) {
         return '-';
@@ -269,17 +379,27 @@
       listEl.innerHTML = items.map((item) => `
         <article class="card">
           <div class="card-top">
-            <div>
+            <div class="card-id">
               <div class="badge">${item.language ? item.language.toUpperCase() : 'N/A'}</div>
             </div>
-            <div class="small">${formatDate(item.created_at)}</div>
+            <div class="date-box">
+              <span class="date-label">Ricevuto</span>
+              <span class="date-value">${formatDateParts(item.created_at).day}</span>
+              <span class="time-value">${formatDateParts(item.created_at).time}</span>
+            </div>
           </div>
           <p class="path">${item.file_path || '-'}</p>
-          <div class="meta">
-            <span>Stato: ${item.status || '-'}</span>
-            <span>Dimensione: ${formatBytes(item.size_bytes)}</span>
-            <span>ID: ${item.submission_id || '-'}</span>
+          <div class="meta-grid">
+            <div class="meta-item">
+              <strong>Stato</strong>
+              <span>${item.status || '-'}</span>
+            </div>
+            <div class="meta-item">
+              <strong>Dimensione</strong>
+              <span>${formatBytes(item.size_bytes)}</span>
+            </div>
           </div>
+          <p class="record-id"><strong>ID:</strong> ${item.submission_id || '-'}</p>
           <div class="actions" style="margin-top:12px;">
             ${item.signed_url ? `<a class="primary" style="text-decoration:none;display:inline-block;" href="${item.signed_url}" target="_blank" rel="noopener">Apri foto</a>` : '<span class="small">Link foto non disponibile</span>'}
           </div>
