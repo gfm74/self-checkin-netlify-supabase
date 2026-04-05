@@ -1,0 +1,344 @@
+<!doctype html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Dashboard Selfie</title>
+  <style>
+    :root {
+      --bg: #f4f2ed;
+      --card: #ffffff;
+      --ink: #1d2b2f;
+      --muted: #6c7c80;
+      --line: #d6dddf;
+      --accent: #2f7d8f;
+      --accent-dark: #245f6d;
+      --danger: #bb4a3a;
+      --ok: #2e7d52;
+      --radius: 18px;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(47, 125, 143, 0.10), transparent 30%),
+        linear-gradient(180deg, #f7f6f2 0%, var(--bg) 100%);
+      color: var(--ink);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .wrap {
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .hero,
+    .panel,
+    .card {
+      background: rgba(255, 255, 255, 0.92);
+      backdrop-filter: blur(10px);
+      border: 1px solid rgba(255, 255, 255, 0.7);
+      box-shadow: 0 20px 40px rgba(31, 44, 49, 0.08);
+      border-radius: var(--radius);
+    }
+
+    .hero {
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 32px;
+      color: var(--accent-dark);
+    }
+
+    .sub {
+      margin: 0;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .panel {
+      padding: 18px;
+      margin-bottom: 18px;
+      display: grid;
+      gap: 12px;
+    }
+
+    label {
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--muted);
+      display: block;
+      margin-bottom: 6px;
+    }
+
+    input[type="password"] {
+      width: 100%;
+      padding: 14px 16px;
+      border-radius: 14px;
+      border: 1px solid var(--line);
+      font-size: 16px;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    button {
+      border: 0;
+      border-radius: 14px;
+      padding: 13px 18px;
+      cursor: pointer;
+      font-size: 15px;
+      font-weight: 800;
+    }
+
+    .primary {
+      background: var(--accent);
+      color: white;
+    }
+
+    .secondary {
+      background: #eaf0f2;
+      color: var(--accent-dark);
+    }
+
+    .meta {
+      display: flex;
+      gap: 16px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 13px;
+      margin-top: 2px;
+    }
+
+    .status {
+      display: none;
+      padding: 12px 14px;
+      border-radius: 14px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .status.show { display: block; }
+    .status.error { background: rgba(187, 74, 58, 0.12); color: var(--danger); }
+    .status.ok { background: rgba(46, 125, 82, 0.12); color: var(--ok); }
+
+    .list {
+      display: grid;
+      gap: 14px;
+    }
+
+    .card {
+      padding: 16px;
+    }
+
+    .card-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: start;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      border-radius: 999px;
+      padding: 6px 10px;
+      background: #eaf0f2;
+      color: var(--accent-dark);
+      font-size: 12px;
+      font-weight: 800;
+    }
+
+    .path {
+      font-size: 13px;
+      color: var(--muted);
+      word-break: break-all;
+      margin: 0 0 12px;
+    }
+
+    .empty {
+      padding: 20px;
+      border-radius: var(--radius);
+      border: 1px dashed var(--line);
+      color: var(--muted);
+      text-align: center;
+      background: rgba(255, 255, 255, 0.6);
+    }
+
+    .small {
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 640px) {
+      body { padding: 14px; }
+      h1 { font-size: 26px; }
+      .hero, .panel, .card { border-radius: 16px; }
+      .actions > * { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <section class="hero">
+      <h1>Dashboard Selfie</h1>
+      <p class="sub">Consulta gli ultimi selfie ricevuti, apri la foto con link temporaneo e aggiorna la lista quando vuoi.</p>
+    </section>
+
+    <section class="panel">
+      <div>
+        <label for="token">Codice accesso dashboard</label>
+        <input id="token" type="password" autocomplete="current-password" placeholder="Inserisci il codice" />
+      </div>
+      <div class="actions">
+        <button id="loadBtn" class="primary" type="button">Carica ultimi selfie</button>
+        <button id="refreshBtn" class="secondary" type="button">Aggiorna</button>
+        <button id="clearBtn" class="secondary" type="button">Esci</button>
+      </div>
+      <div class="meta">
+        <span id="lastUpdate">Ultimo aggiornamento: -</span>
+        <span>Refresh automatico: 30 secondi</span>
+      </div>
+    </section>
+
+    <div id="status" class="status"></div>
+    <section id="list" class="list"></section>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'selfieDashboardToken';
+    const REFRESH_MS = 30000;
+
+    const tokenInput = document.getElementById('token');
+    const loadBtn = document.getElementById('loadBtn');
+    const refreshBtn = document.getElementById('refreshBtn');
+    const clearBtn = document.getElementById('clearBtn');
+    const statusEl = document.getElementById('status');
+    const listEl = document.getElementById('list');
+    const lastUpdateEl = document.getElementById('lastUpdate');
+
+    tokenInput.value = localStorage.getItem(STORAGE_KEY) || '';
+
+    function formatDate(value) {
+      try {
+        return new Date(value).toLocaleString('it-IT', {
+          dateStyle: 'short',
+          timeStyle: 'short'
+        });
+      } catch (error) {
+        return value || '-';
+      }
+    }
+
+    function formatBytes(bytes) {
+      if (!Number.isFinite(bytes) || bytes <= 0) {
+        return '-';
+      }
+      if (bytes < 1024) return `${bytes} B`;
+      if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+      return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
+    }
+
+    function setStatus(message, type) {
+      statusEl.textContent = message;
+      statusEl.className = `status show ${type || ''}`.trim();
+    }
+
+    function clearStatus() {
+      statusEl.textContent = '';
+      statusEl.className = 'status';
+    }
+
+    function renderItems(items) {
+      if (!items.length) {
+        listEl.innerHTML = '<div class="empty">Nessun selfie trovato.</div>';
+        return;
+      }
+
+      listEl.innerHTML = items.map((item) => `
+        <article class="card">
+          <div class="card-top">
+            <div>
+              <div class="badge">${item.language ? item.language.toUpperCase() : 'N/A'}</div>
+            </div>
+            <div class="small">${formatDate(item.created_at)}</div>
+          </div>
+          <p class="path">${item.file_path || '-'}</p>
+          <div class="meta">
+            <span>Stato: ${item.status || '-'}</span>
+            <span>Dimensione: ${formatBytes(item.size_bytes)}</span>
+            <span>ID: ${item.submission_id || '-'}</span>
+          </div>
+          <div class="actions" style="margin-top:12px;">
+            ${item.signed_url ? `<a class="primary" style="text-decoration:none;display:inline-block;" href="${item.signed_url}" target="_blank" rel="noopener">Apri foto</a>` : '<span class="small">Link foto non disponibile</span>'}
+          </div>
+        </article>
+      `).join('');
+    }
+
+    async function loadItems() {
+      const token = tokenInput.value.trim();
+
+      if (!token) {
+        setStatus('Inserisci il codice accesso della dashboard.', 'error');
+        return;
+      }
+
+      localStorage.setItem(STORAGE_KEY, token);
+      setStatus('Caricamento in corso...', 'ok');
+
+      try {
+        const response = await fetch(`/.netlify/functions/list-checkins?token=${encodeURIComponent(token)}&limit=30`, {
+          cache: 'no-store'
+        });
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+          if (response.status === 401) {
+            throw new Error('Codice accesso non valido.');
+          }
+          throw new Error(data.error || 'Errore durante il caricamento.');
+        }
+
+        renderItems(Array.isArray(data.items) ? data.items : []);
+        lastUpdateEl.textContent = `Ultimo aggiornamento: ${formatDate(new Date().toISOString())}`;
+        clearStatus();
+      } catch (error) {
+        renderItems([]);
+        setStatus(error.message || 'Errore durante il caricamento.', 'error');
+      }
+    }
+
+    loadBtn.addEventListener('click', loadItems);
+    refreshBtn.addEventListener('click', loadItems);
+    clearBtn.addEventListener('click', () => {
+      localStorage.removeItem(STORAGE_KEY);
+      tokenInput.value = '';
+      listEl.innerHTML = '';
+      lastUpdateEl.textContent = 'Ultimo aggiornamento: -';
+      clearStatus();
+    });
+
+    if (tokenInput.value) {
+      loadItems();
+    }
+
+    window.setInterval(() => {
+      if (tokenInput.value.trim()) {
+        loadItems();
+      }
+    }, REFRESH_MS);
+  </script>
+</body>
+</html>

@@ -118,3 +118,24 @@ Flusso consigliato:
 5. aggiungi le variabili su Netlify
 
 Quando arriva un nuovo selfie, ricevi un messaggio Telegram con link temporaneo alla foto.
+
+## Dashboard operativa
+
+Se preferisci consultare gli invii senza notifiche, usa `dashboard.html`.
+
+Funziona cosi':
+
+1. apri `/dashboard.html`
+2. inserisci il codice dashboard
+3. la pagina carica gli ultimi selfie e si aggiorna ogni 30 secondi
+4. ogni elemento ha un link temporaneo per aprire la foto
+
+Variabili ambiente necessarie:
+
+- `DASHBOARD_ACCESS_TOKEN`
+- `DASHBOARD_LINK_EXPIRES_IN`
+
+Esempio:
+
+- `DASHBOARD_ACCESS_TOKEN` = una password lunga scelta da te
+- `DASHBOARD_LINK_EXPIRES_IN` = `43200` per link validi 12 ore
